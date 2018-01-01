@@ -9,10 +9,6 @@ import com.google.android.gms.location.GeofencingEvent;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
-import static android.content.ContentValues.TAG;
-
 public class GeofenceTransitionsIntentService extends IntentService {
     public static final String TAG = GeofenceTransitionsIntentService.class.getSimpleName();
 
@@ -40,6 +36,5 @@ public class GeofenceTransitionsIntentService extends IntentService {
         } else {
 
         }
-
     }
 }

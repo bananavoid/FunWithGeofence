@@ -2,6 +2,8 @@ package com.spacebanana.funwithgeofence.di;
 
 import android.app.Application;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.LocationServices;
 
@@ -25,5 +27,7 @@ public class AppModule {
         return LocationServices.getGeofencingClient(application);
     }
 
-
+    @Provides FusedLocationProviderClient provideFusedLocationClient() {
+        return LocationServices.getFusedLocationProviderClient(application);
+    }
 }
