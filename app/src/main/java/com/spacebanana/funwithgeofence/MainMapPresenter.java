@@ -11,4 +11,6 @@ public class MainMapPresenter extends Presenter<MainMap> {
         super();
         this.repository = repository;
     }
+
+
 }

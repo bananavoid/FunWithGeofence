@@ -9,6 +9,9 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.spacebanana.funwithgeofence.di.AppComponent;
+import com.spacebanana.funwithgeofence.di.AppModule;
+import com.spacebanana.funwithgeofence.di.DaggerAppComponent;
 
 import javax.inject.Inject;
 
@@ -16,11 +19,16 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     private GoogleMap mMap;
     @Inject MainMapPresenter presenter;
+    private AppComponent component;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        component = (AppComponent) getLastCustomNonConfigurationInstance();
+        if (component == null) {
+            component = DaggerAppComponent.builder().appModule(new AppModule(getApplication())).build();
+        }
+        component.inject(this);
         setContentView(R.layout.activity_main);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -28,6 +36,22 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        presenter.takeView(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        presenter.dropView(this);
+    }
+
+    @Override
+    public Object onRetainCustomNonConfigurationInstance() {
+        return component;
+    }
 
     /**
      * Manipulates the map once available.
@@ -54,7 +78,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    public void showGeorenceStatus(boolean isInsideZone) {
+    public void showGeofenceStatus(boolean isInsideZone) {
 
     }
 }

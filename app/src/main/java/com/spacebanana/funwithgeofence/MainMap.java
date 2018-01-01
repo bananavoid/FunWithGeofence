@@ -6,6 +6,6 @@ public interface MainMap extends ViewCallbacks {
 
     void showGeofenceParams(long lat, long lon, int radius);
 
-    void showGeorenceStatus(boolean isInsideZone);
+    void showGeofenceStatus(boolean isInsideZone);
 
 }

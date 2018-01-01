@@ -2,6 +2,9 @@ package com.spacebanana.funwithgeofence.di;
 
 import android.app.Application;
 
+import com.google.android.gms.location.GeofencingClient;
+import com.google.android.gms.location.LocationServices;
+
 import dagger.Module;
 import dagger.Provides;
 
@@ -18,6 +21,9 @@ public class AppModule {
         return application;
     }
 
+    @Provides GeofencingClient provideGeofencingClient() {
+        return LocationServices.getGeofencingClient(application);
+    }
 
 
 }
