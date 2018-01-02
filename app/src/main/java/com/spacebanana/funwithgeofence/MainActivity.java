@@ -47,7 +47,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         component = (AppComponent) getLastCustomNonConfigurationInstance();
         if (component == null) {
-            component = DaggerAppComponent.builder().appModule(new AppModule(getApplication())).build();
+            component = DaggerAppComponent.builder().appModule(new AppModule(FunWithGeofenceApplication.get())).build();
         }
         component.inject(this);
 

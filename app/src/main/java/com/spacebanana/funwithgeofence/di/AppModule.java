@@ -5,6 +5,7 @@ import android.app.Application;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.LocationServices;
+import com.spacebanana.funwithgeofence.FunWithGeofenceApplication;
 
 import dagger.Module;
 import dagger.Provides;
@@ -12,13 +13,13 @@ import dagger.Provides;
 @Module
 public class AppModule {
 
-    private Application application;
+    private FunWithGeofenceApplication application;
 
-    public AppModule(Application application) {
+    public AppModule(FunWithGeofenceApplication application) {
         this.application = application;
     }
 
-    @Provides Application provideApplication() {
+    @Provides FunWithGeofenceApplication provideApplication() {
         return application;
     }
 
