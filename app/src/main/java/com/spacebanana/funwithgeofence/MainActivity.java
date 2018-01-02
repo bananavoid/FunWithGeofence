@@ -2,6 +2,7 @@ package com.spacebanana.funwithgeofence;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -123,7 +124,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         CircleOptions circleOptions = new CircleOptions()
                 .center(latLng)
-                .radius(100);
+//                .fillColor(Color.argb(128, 255, 0, 0))
+                .radius(150);
 
         circle = googleMap.addCircle(circleOptions);
 

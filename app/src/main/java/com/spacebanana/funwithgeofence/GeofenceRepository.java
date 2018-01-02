@@ -11,6 +11,4 @@ public class GeofenceRepository {
     @Inject public GeofenceRepository(GeofencingClient geofencingClient) {
         this.geofencingClient = geofencingClient;
     }
-
-
 }
