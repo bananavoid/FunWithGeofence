@@ -59,7 +59,6 @@ public class MainMapPresenter extends Presenter<MainMap> implements SharedPrefer
 
     public void defaultInit() {
         repository.clearData();
-        repository.setIsInArea(true);
         repository.setOnSharedPrefsListener(this);
     }
 
