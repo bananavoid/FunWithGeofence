@@ -8,7 +8,7 @@ this ssid will be defined as selected network.
 
 User is welcome
 - choose another center of geofence area by long tap on map
-- set another network ssid clicking on "Add network"
+- set another network ssid clicking on "Set network name" from action bar menu
 - change geofence area with seek bar.
 
 
