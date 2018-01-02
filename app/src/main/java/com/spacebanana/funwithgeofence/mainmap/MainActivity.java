@@ -1,19 +1,26 @@
 package com.spacebanana.funwithgeofence.mainmap;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.text.InputType;
+import android.view.ContextThemeWrapper;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -23,7 +30,6 @@ import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.spacebanana.funwithgeofence.Constants;
 import com.spacebanana.funwithgeofence.FunWithGeofenceApplication;
 import com.spacebanana.funwithgeofence.geofence.GeofenceTransitionsIntentService;
@@ -38,11 +44,29 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     @Inject
     MainMapPresenter presenter;
 
-    @Inject
-    FusedLocationProviderClient fusedLocationProviderClient;
-
     private GoogleMap googleMap;
     private Circle circle;
+    private SeekBar.OnSeekBarChangeListener mRadiusSeekBarListener = new SeekBar.OnSeekBarChangeListener() {
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+            TextView currentValueText = findViewById(R.id.current_value_text);
+            currentValueText.setText(String.valueOf(i));
+
+            if (circle != null) {
+                circle.setRadius(i);
+            }
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            addGeofence(circle.getCenter(), circle.getRadius());
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,10 +77,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         initMap();
         initViews();
         initSubscribers();
-    }
-
-    private void initSubscribers() {
-        presenter.subscribeOnNetworkStateChange(this);
     }
 
     @Override
@@ -79,6 +99,53 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.add_network:
+                showSetNetworkDialog();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void showSetNetworkDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogTheme));
+        builder.setTitle(R.string.set_network_name_title);
+
+        final EditText input = new EditText(this);
+        input.setPadding(40,40,40,40);
+        input.setHint(R.string.name);
+        input.setHintTextColor(Color.GRAY);
+        input.setTextColor(Color.BLACK);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                presenter.setNetworkName(input.getText().toString());
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+    }
+
+    @Override
     public void onMapReady(GoogleMap googleMap) {
         this.googleMap = googleMap;
 
@@ -87,7 +154,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         this.googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
             @Override
             public void onMapLongClick(LatLng latLng) {
-                addMarkerOnMap(latLng);
+                setAreaOnMap(latLng, Constants.MIN_GEOFENCE_RADIUS);
             }
         });
 
@@ -108,8 +175,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    public void showGeofenceParams(long lat, long lon, int radius) {
-
+    public void showGeofenceArea(double lat, double lon, int radius) {
+        setAreaOnMap(new LatLng(lat, lon), radius);
     }
 
     @Override
@@ -117,8 +184,11 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         getActionBar().setTitle(isInsideZone ? "CONNECTED" : "DISCONNECTED");
     }
 
-    private void addMarkerOnMap(LatLng latLng) {
-        // ALARM! Only one marker on map is allowed, clearing up
+    private void initSubscribers() {
+        presenter.subscribeOnNetworkStateChange(this);
+    }
+
+    private void setAreaOnMap(LatLng latLng, int radius) {
         googleMap.clear();
 
         MarkerOptions options = new MarkerOptions()
@@ -128,8 +198,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         CircleOptions circleOptions = new CircleOptions()
                 .center(latLng)
-//                .fillColor(Color.argb(128, 255, 0, 0))
-                .radius(Constants.MIN_GEOFENCE_RADIUS);
+                .radius(radius);
 
         circle = googleMap.addCircle(circleOptions);
 
@@ -154,30 +223,14 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         SeekBar seekBar = findViewById(R.id.radius_seek_bar);
         seekBar.setProgress(Constants.MIN_GEOFENCE_RADIUS);
+
         TextView currentValueText = findViewById(R.id.current_value_text);
         currentValueText.setText(String.valueOf(Constants.MIN_GEOFENCE_RADIUS));
 
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                TextView currentValueText = findViewById(R.id.current_value_text);
-                currentValueText.setText(String.valueOf(i));
+        TextView maxValueText = findViewById(R.id.max_value_text);
+        maxValueText.setText(String.valueOf(Constants.MAX_GEOFENCE_RADIUS));
 
-                if (circle != null) {
-                    circle.setRadius(i);
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
+        seekBar.setOnSeekBarChangeListener(mRadiusSeekBarListener);
     }
 
     private void findCurrentLocationAndSetOnMap() {
@@ -187,15 +240,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                     ACCESS_LOCATION_REQUEST_CODE);
         } else {
             googleMap.setMyLocationEnabled(true);
-            fusedLocationProviderClient.getLastLocation()
-                    .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location location) {
-                            if (location != null && googleMap != null) {
-                                addMarkerOnMap(new LatLng(location.getLatitude(), location.getLongitude()));
-                            }
-                        }
-                    });
+            presenter.findCurrentLocation();
         }
     }
 

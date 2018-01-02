@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">FunWithGeofence</string>
     <string name="title_activity_main">Fun with geofence</string>
+    <string name="add_network">Add network</string>
+    <string name="set_network_name_title">Set the tracked network name</string>
+    <string name="name">Name</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">Ok</string>
 </resources>
