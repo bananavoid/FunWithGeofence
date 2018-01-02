@@ -13,6 +13,7 @@ User is welcome
 
 
 The app was build with MVP arch and help of dagger 2 and rxjava.
+Thanks to Dmitriy and his lib https://github.com/RxViper/RxViper for the classes that were used for MVP sugar.
 
 Missed things:
 
