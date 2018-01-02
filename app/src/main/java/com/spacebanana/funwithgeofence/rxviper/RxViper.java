@@ -16,12 +16,6 @@
 
 package com.spacebanana.funwithgeofence.rxviper;
 
-import com.dzaitsev.rxviper.NullObject;
-import com.dzaitsev.rxviper.Presenter;
-import com.dzaitsev.rxviper.Router;
-import com.dzaitsev.rxviper.ViewCallbacks;
-import com.dzaitsev.rxviper.ViperPresenter;
-
 import java.lang.reflect.GenericDeclaration;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
@@ -49,7 +43,7 @@ final class RxViper {
     return arg;
   }
 
-  static <V extends ViewCallbacks> V createView(V view, Class<? extends com.dzaitsev.rxviper.Presenter> actualClass) {
+  static <V extends ViewCallbacks> V createView(V view, Class<? extends Presenter> actualClass) {
     return createProxy(view, Presenter.class, actualClass, 0);
   }
 

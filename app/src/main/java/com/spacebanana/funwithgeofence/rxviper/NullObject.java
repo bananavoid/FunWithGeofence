@@ -19,7 +19,8 @@ package com.spacebanana.funwithgeofence.rxviper;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import javax.annotation.Nullable;
+
+import io.reactivex.annotations.Nullable;
 
 /**
  * Implementation of <a href="https://en.wikipedia.org/wiki/Null_Object_pattern">Null Object pattern</a>.

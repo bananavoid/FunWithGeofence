@@ -53,6 +53,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         setContentView(R.layout.activity_main);
 
+        presenter.subscribeOnNetworkStateChange(this);
+
         initMap();
         initViews();
     }
@@ -67,6 +69,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onPause() {
         super.onPause();
         presenter.dropView(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (presenter.getNetworkStateSubscription() != null)
+            presenter.getNetworkStateSubscription().dispose();
     }
 
     @Override
@@ -110,7 +119,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void showGeofenceStatus(boolean isInsideZone) {
-
+        getActionBar().setTitle(isInsideZone ? "CONNECTED" : "DISCONNECTED");
     }
 
     private void addMarkerOnMap(LatLng latLng) {
@@ -143,6 +152,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void initViews() {
+        getActionBar().setTitle("NO STATUS");
+        presenter.setNetworkName("spacelobster");
+
         SeekBar seekBar = findViewById(R.id.radius_seek_bar);
         seekBar.setProgress(150);
         TextView currentValueText = findViewById(R.id.current_value_text);

@@ -17,10 +17,10 @@
 package com.spacebanana.funwithgeofence.rxviper;
 
 /**
- * Displays what it is told to by the {@link Presenter} and relays user input back to the Presenter
+ * Contains navigation logic for describing which screens are shown in which order
  *
  * @author Dmytro Zaitsev
- * @since 0.3.0
+ * @since 0.1.0
  */
-public interface ViewCallbacks {
+public interface Router {
 }

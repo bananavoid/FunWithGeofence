@@ -16,18 +16,13 @@
 
 package com.spacebanana.funwithgeofence.rxviper;
 
-import com.dzaitsev.rxviper.Interactor;
-import com.dzaitsev.rxviper.ViewCallbacks;
-
 import io.reactivex.annotations.NonNull;
 import io.reactivex.annotations.Nullable;
 
+import static com.spacebanana.funwithgeofence.rxviper.RxViper.getProxy;
 import static com.spacebanana.funwithgeofence.rxviper.RxViper.requireNotNull;
 
 /**
- * Contains view logic for preparing content for display (as received from the {@link Interactor}) and for reacting to user inputs (by
- * requesting new data from the Interactor).
- *
  * @author Dmytro Zaitsev
  * @since 0.1.0
  */

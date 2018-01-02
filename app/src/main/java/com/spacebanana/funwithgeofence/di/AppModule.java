@@ -5,7 +5,6 @@ import android.app.Application;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.LocationServices;
-import com.spacebanana.funwithgeofence.NetworkStateManager;
 
 import dagger.Module;
 import dagger.Provides;
@@ -29,9 +28,5 @@ public class AppModule {
 
     @Provides FusedLocationProviderClient provideFusedLocationClient() {
         return LocationServices.getFusedLocationProviderClient(application);
-    }
-
-    @Provides NetworkStateManager provideNetworkStateManager() {
-        return new NetworkStateManager(application);
     }
 }

@@ -1,4 +1,4 @@
-package com.spacebanana.funwithgeofence;
+package com.spacebanana.funwithgeofence.repository;
 
 import com.google.android.gms.location.GeofencingClient;
 
