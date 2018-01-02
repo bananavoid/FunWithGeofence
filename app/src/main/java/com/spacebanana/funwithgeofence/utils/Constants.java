@@ -1,4 +1,4 @@
-package com.spacebanana.funwithgeofence;
+package com.spacebanana.funwithgeofence.utils;
 
 public class Constants {
     public static final int MIN_GEOFENCE_RADIUS = 150;

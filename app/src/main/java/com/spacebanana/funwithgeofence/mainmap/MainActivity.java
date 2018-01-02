@@ -16,7 +16,6 @@ import android.view.ContextThemeWrapper;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
@@ -31,12 +30,10 @@ import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.spacebanana.funwithgeofence.Constants;
+import com.spacebanana.funwithgeofence.utils.Constants;
 import com.spacebanana.funwithgeofence.FunWithGeofenceApplication;
 import com.spacebanana.funwithgeofence.geofence.GeofenceTransitionsIntentService;
 import com.spacebanana.funwithgeofence.R;
-
-import org.w3c.dom.Text;
 
 import javax.inject.Inject;
 
@@ -132,14 +129,14 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         input.setPadding(40,40,40,40);
         input.setTextColor(Color.BLACK);
         input.setInputType(InputType.TYPE_CLASS_TEXT);
-        String nn = presenter.getNetworkName();
-        input.setText(nn);
+        input.setText(presenter.getNetworkName());
         builder.setView(input);
 
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                presenter.setNetworkName(input.getText().toString());
+                if (!input.getText().toString().isEmpty())
+                    presenter.setNetworkName(input.getText().toString());
             }
         });
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
