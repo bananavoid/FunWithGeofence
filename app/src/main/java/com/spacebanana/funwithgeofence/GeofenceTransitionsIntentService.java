@@ -31,7 +31,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
         if (geofencingEvent.hasError()) {
-            // handle error
+            // TODO handle error
             return;
         }
 

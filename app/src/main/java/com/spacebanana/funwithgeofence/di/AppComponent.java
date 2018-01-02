@@ -1,7 +1,7 @@
 package com.spacebanana.funwithgeofence.di;
 
 import com.spacebanana.funwithgeofence.GeofenceTransitionsIntentService;
-import com.spacebanana.funwithgeofence.MainActivity;
+import com.spacebanana.funwithgeofence.mainmap.MainActivity;
 
 import dagger.Component;
 
