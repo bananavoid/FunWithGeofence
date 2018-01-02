@@ -61,13 +61,6 @@ public class MainMapPresenter extends Presenter<MainMap> implements SharedPrefer
         }
     }
 
-    public void defaultInit() {
-        repository.clearData();
-        repository.setIsNetworkConnected(false);
-        repository.setNetworkName("");
-        repository.setOnSharedPrefsListener(this);
-    }
-
     public void setNetworkName(String networkName) {
         String currentlyConnectedTo = getConnectedNetworkName().replace("\"", "");
 
@@ -153,6 +146,13 @@ public class MainMapPresenter extends Presenter<MainMap> implements SharedPrefer
         repository.saveLocationData(centralPoint, radius);
 
         setIsCurrentLocationInArea();
+    }
+
+    private void defaultInit() {
+        repository.clearData();
+        repository.setIsNetworkConnected(false);
+        repository.setNetworkName("");
+        repository.setOnSharedPrefsListener(this);
     }
 
     private String getConnectedNetworkName() {
