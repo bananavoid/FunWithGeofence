@@ -129,10 +129,11 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         builder.setTitle(R.string.set_network_name_title);
 
         final EditText input = new EditText(this);
-        input.setText(presenter.getNetworkName());
         input.setPadding(40,40,40,40);
         input.setTextColor(Color.BLACK);
         input.setInputType(InputType.TYPE_CLASS_TEXT);
+        String nn = presenter.getNetworkName();
+        input.setText(nn);
         builder.setView(input);
 
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
@@ -240,9 +241,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         detailsLayout = findViewById(R.id.details_lt);
 
         statusText = findViewById(R.id.status_text);
-
-//        setViewsByStatus(R.drawable.status_inside_bg, getString(R.string.status_inside_title),
-//                getString(R.string.status_inside));
     }
 
     private void setViewsByStatus(int drawable, String statusTitle, String status) {

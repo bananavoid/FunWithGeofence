@@ -19,7 +19,7 @@
     <RelativeLayout
         android:id="@+id/details_lt"
         android:layout_width="match_parent"
-        android:layout_height="90dp">
+        android:layout_height="100dp">
 
         <TextView
             android:id="@+id/status_text"
@@ -32,7 +32,7 @@
             android:id="@+id/radius_seek_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingBottom="20dp"
+            android:paddingBottom="24dp"
             android:max="500"
             android:layout_alignParentBottom="true"/>
 

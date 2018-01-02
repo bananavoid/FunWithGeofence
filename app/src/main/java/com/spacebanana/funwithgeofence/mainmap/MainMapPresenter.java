@@ -47,8 +47,7 @@ public class MainMapPresenter extends Presenter<MainMap> implements SharedPrefer
         this.geofencingClient = gfClient;
         this.fusedLocationProviderClient = flProviderClient;
 
-        this.repository.clearData();
-        this.repository.setOnSharedPrefsListener(this);
+        defaultInit();
     }
 
     @Override
@@ -56,6 +55,12 @@ public class MainMapPresenter extends Presenter<MainMap> implements SharedPrefer
         if (s.equals(SharedPrefsRepository.PREF_IS_IN_AREA)) {
             applyStatusChange();
         }
+    }
+
+    public void defaultInit() {
+        repository.clearData();
+        repository.setIsInArea(true);
+        repository.setOnSharedPrefsListener(this);
     }
 
     public void setNetworkName(String networkName) {
@@ -86,8 +91,8 @@ public class MainMapPresenter extends Presenter<MainMap> implements SharedPrefer
                     @Override
                     public void accept(final Connectivity connectivity) {
                         String networkSSID = connectivity.getExtraInfo().replace("\"", "");
-                        if (repository.getNetworkName().isEmpty())
-                            repository.setNetworkName(networkSSID);
+                        if (getNetworkName().isEmpty())
+                            setNetworkName(networkSSID);
 
                         if (networkSSID.equals(repository.getNetworkName()) && connectivity.getType() == ConnectivityManager.TYPE_WIFI) {
                             repository.setIsNetworkConnected(connectivity.isAvailable());
@@ -150,7 +155,9 @@ public class MainMapPresenter extends Presenter<MainMap> implements SharedPrefer
     }
 
     private void applyStatusChange() {
-        boolean isInTheArea = repository.isNetworkConnected() && repository.isInArea() || repository.isNetworkConnected();
+        boolean isnet = repository.isNetworkConnected();
+        boolean isarea = repository.isInArea();
+        boolean isInTheArea = isnet || isarea;
         if (isInTheArea != isConnected) {
             isConnected = isInTheArea;
             getView().showGeofenceStatus(isConnected);
