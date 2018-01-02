@@ -62,7 +62,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
-            addGeofence(circle.getCenter(), circle.getRadius());
+            setGeofence(circle.getCenter(), circle.getRadius());
         }
     };
 
@@ -215,7 +215,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 .build()
         ));
 
-        addGeofence(latLng, circle.getRadius());
+        setGeofence(latLng, circle.getRadius());
     }
 
     private void initMap() {
@@ -261,7 +261,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    private void addGeofence(LatLng point, Double radius) {
+    private void setGeofence(LatLng point, Double radius) {
         if (presenter.getGeofencePendingIntent() == null){
             Intent intent = new Intent(this, GeofenceIntentService.class);
             PendingIntent pendingIntent = PendingIntent.getService(this, GEOFENCE_REQUEST_CODE, intent,
