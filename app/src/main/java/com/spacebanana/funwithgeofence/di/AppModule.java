@@ -1,7 +1,5 @@
 package com.spacebanana.funwithgeofence.di;
 
-import android.app.Application;
-
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.LocationServices;

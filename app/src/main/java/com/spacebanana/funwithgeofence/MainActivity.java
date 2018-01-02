@@ -3,6 +3,7 @@ package com.spacebanana.funwithgeofence;
 import android.Manifest;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -27,7 +28,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.spacebanana.funwithgeofence.di.AppComponent;
 import com.spacebanana.funwithgeofence.di.AppModule;
-import com.spacebanana.funwithgeofence.di.DaggerAppComponent;
 
 import javax.inject.Inject;
 
@@ -42,24 +42,21 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     FusedLocationProviderClient fusedLocationProviderClient;
 
     private GoogleMap googleMap;
-    private AppComponent component;
     private Circle circle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        component = (AppComponent) getLastCustomNonConfigurationInstance();
-        if (component == null) {
-            component = DaggerAppComponent.builder().appModule(new AppModule(FunWithGeofenceApplication.get())).build();
-        }
-        component.inject(this);
-
+        FunWithGeofenceApplication.get().getInjector().inject(this);
         setContentView(R.layout.activity_main);
-
-        presenter.subscribeOnNetworkStateChange(this);
 
         initMap();
         initViews();
+        initSubscribers();
+    }
+
+    private void initSubscribers() {
+        presenter.subscribeOnNetworkStateChange(this);
     }
 
     @Override
@@ -79,11 +76,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         super.onDestroy();
         if (presenter.getNetworkStateSubscription() != null)
             presenter.getNetworkStateSubscription().dispose();
-    }
-
-    @Override
-    public Object onRetainCustomNonConfigurationInstance() {
-        return component;
     }
 
     @Override
@@ -161,9 +153,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         presenter.setNetworkName("spacelobster");
 
         SeekBar seekBar = findViewById(R.id.radius_seek_bar);
-        seekBar.setProgress(150);
+        seekBar.setProgress(Constants.MIN_GEOFENCE_RADIUS);
         TextView currentValueText = findViewById(R.id.current_value_text);
-        currentValueText.setText(String.valueOf(150));
+        currentValueText.setText(String.valueOf(Constants.MIN_GEOFENCE_RADIUS));
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override

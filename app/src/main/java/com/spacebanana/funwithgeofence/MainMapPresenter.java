@@ -104,6 +104,7 @@ public class MainMapPresenter extends Presenter<MainMap> implements SharedPrefer
                 )
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER |
                         Geofence.GEOFENCE_TRANSITION_EXIT)
+                .setExpirationDuration(Constants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
                 .build();
 
         List<Geofence> geofenceList = new ArrayList<>(1);
