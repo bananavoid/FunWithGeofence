@@ -32,7 +32,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.spacebanana.funwithgeofence.utils.Constants;
 import com.spacebanana.funwithgeofence.FunWithGeofenceApplication;
-import com.spacebanana.funwithgeofence.geofence.GeofenceTransitionsIntentService;
+import com.spacebanana.funwithgeofence.geofence.GeofenceIntentService;
 import com.spacebanana.funwithgeofence.R;
 
 import javax.inject.Inject;
@@ -257,13 +257,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                     ACCESS_LOCATION_REQUEST_CODE);
         } else {
             googleMap.setMyLocationEnabled(true);
-            presenter.findCurrentLocation();
+            presenter.addGeofenceToCurrentLocation();
         }
     }
 
     private void addGeofence(LatLng point, Double radius) {
         if (presenter.getGeofencePendingIntent() == null){
-            Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
+            Intent intent = new Intent(this, GeofenceIntentService.class);
             PendingIntent pendingIntent = PendingIntent.getService(this, GEOFENCE_REQUEST_CODE, intent,
                     PendingIntent.FLAG_UPDATE_CURRENT);
             presenter.setGeofencePendingIntent(pendingIntent);

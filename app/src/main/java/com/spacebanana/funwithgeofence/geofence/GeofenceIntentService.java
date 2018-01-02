@@ -10,18 +10,18 @@ import com.spacebanana.funwithgeofence.repository.SharedPrefsRepository;
 
 import javax.inject.Inject;
 
-public class GeofenceTransitionsIntentService extends IntentService {
-    public static final String TAG = GeofenceTransitionsIntentService.class.getSimpleName();
+public class GeofenceIntentService extends IntentService {
+    public static final String TAG = GeofenceIntentService.class.getSimpleName();
 
     @Inject SharedPrefsRepository repository;
 
-    public GeofenceTransitionsIntentService() {
+    public GeofenceIntentService() {
         super(TAG);
 
         FunWithGeofenceApplication.get().getInjector().inject(this);
     }
 
-    public GeofenceTransitionsIntentService(String name) {
+    public GeofenceIntentService(String name) {
         super(name);
 
         FunWithGeofenceApplication.get().getInjector().inject(this);

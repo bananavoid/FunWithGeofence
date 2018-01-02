@@ -1,6 +1,6 @@
 package com.spacebanana.funwithgeofence.di;
 
-import com.spacebanana.funwithgeofence.geofence.GeofenceTransitionsIntentService;
+import com.spacebanana.funwithgeofence.geofence.GeofenceIntentService;
 import com.spacebanana.funwithgeofence.mainmap.MainActivity;
 
 import dagger.Component;
@@ -9,5 +9,5 @@ import dagger.Component;
 public interface AppComponent {
 
     void inject(MainActivity activity);
-    void inject(GeofenceTransitionsIntentService service);
+    void inject(GeofenceIntentService service);
 }
