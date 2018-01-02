@@ -1,14 +1,25 @@
 package com.spacebanana.funwithgeofence;
 
 
+import android.app.PendingIntent;
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.support.annotation.NonNull;
 
 import com.github.pwittchen.reactivenetwork.library.rx2.Connectivity;
 import com.github.pwittchen.reactivenetwork.library.rx2.ReactiveNetwork;
 import com.github.pwittchen.reactivenetwork.library.rx2.network.observing.strategy.LollipopNetworkObservingStrategy;
-import com.spacebanana.funwithgeofence.repository.GeofenceRepository;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingClient;
+import com.google.android.gms.location.GeofencingRequest;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.spacebanana.funwithgeofence.repository.SharedPrefsRepository;
 import com.spacebanana.funwithgeofence.rxviper.Presenter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -17,15 +28,18 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
-public class MainMapPresenter extends Presenter<MainMap> {
-    private final GeofenceRepository repository;
+public class MainMapPresenter extends Presenter<MainMap> implements OnCompleteListener<Void> {
+    private final SharedPrefsRepository repository;
+    private final GeofencingClient geofencingClient;
     private String networkName;
     private Disposable networkStateSubscription;
+    private PendingIntent geofencePendingIntent;
 
     @Inject
-    public MainMapPresenter(GeofenceRepository repository) {
+    public MainMapPresenter(SharedPrefsRepository repository, GeofencingClient gfClient) {
         super();
         this.repository = repository;
+        this.geofencingClient = gfClient;
     }
 
     @Override
@@ -60,9 +74,62 @@ public class MainMapPresenter extends Presenter<MainMap> {
 
     public void setNetworkName(String networkName) {
         this.networkName = networkName;
+        repository.setNetworkName(networkName);
     }
 
     public Disposable getNetworkStateSubscription() {
         return networkStateSubscription;
+    }
+
+    public PendingIntent getGeofencePendingIntent() {
+        return geofencePendingIntent;
+    }
+
+    public void setGeofencePendingIntent(PendingIntent geofencePendingIntent) {
+        this.geofencePendingIntent = geofencePendingIntent;
+    }
+
+    @SuppressWarnings("MissingPermission")
+    public void addGeofenceArea(PendingIntent intent, LatLng centralPoint, int radius) {
+        //only one geofence are is allowed, clearing up
+        removeGeofences();
+
+        setGeofencePendingIntent(intent);
+
+        Geofence geofence = new Geofence.Builder()
+                .setRequestId("geofence")
+                .setCircularRegion(
+                        centralPoint.latitude,
+                        centralPoint.longitude,
+                        radius
+                )
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER |
+                        Geofence.GEOFENCE_TRANSITION_EXIT)
+                .build();
+
+        List<Geofence> geofenceList = new ArrayList<>(1);
+        geofenceList.add(geofence);
+
+        geofencingClient.addGeofences(getGeofencingRequest(geofenceList), getGeofencePendingIntent())
+                .addOnCompleteListener(this);
+
+        repository.saveLocationData(centralPoint, radius);
+    }
+
+    @SuppressWarnings("MissingPermission")
+    private void removeGeofences() {
+        repository.clearLocationData();
+        geofencingClient.removeGeofences(getGeofencePendingIntent()).addOnCompleteListener(this);
+    }
+
+    private GeofencingRequest getGeofencingRequest(List<Geofence> geofenceList) {
+        GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
+        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER|GeofencingRequest.INITIAL_TRIGGER_EXIT);
+        builder.addGeofences(geofenceList);
+        return builder.build();
+    }
+
+    @Override
+    public void onComplete(@NonNull Task<Void> task) {
     }
 }

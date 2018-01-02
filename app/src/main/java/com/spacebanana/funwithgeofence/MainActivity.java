@@ -1,6 +1,8 @@
 package com.spacebanana.funwithgeofence;
 
 import android.Manifest;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -31,6 +33,7 @@ import javax.inject.Inject;
 
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback, MainMap {
     private static final int ACCESS_LOCATION_REQUEST_CODE = 929;
+    private static final int GEOFENCE_REQUEST_CODE = 543;
 
     @Inject
     MainMapPresenter presenter;
@@ -134,7 +137,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         CircleOptions circleOptions = new CircleOptions()
                 .center(latLng)
 //                .fillColor(Color.argb(128, 255, 0, 0))
-                .radius(150);
+                .radius(Constants.MIN_GEOFENCE_RADIUS);
 
         circle = googleMap.addCircle(circleOptions);
 
@@ -143,6 +146,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 .zoom(15)
                 .build()
         ));
+
+        addGeofence(latLng, circle.getRadius());
     }
 
     private void initMap() {
@@ -200,5 +205,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                         }
                     });
         }
+    }
+
+    private void addGeofence(LatLng point, Double radius) {
+        Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
+        PendingIntent pendingIntent = PendingIntent.getService(this, GEOFENCE_REQUEST_CODE, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        presenter.addGeofenceArea(pendingIntent, point, radius.intValue());
     }
 }

@@ -6,13 +6,17 @@ import android.util.Log;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
+import com.spacebanana.funwithgeofence.repository.SharedPrefsRepository;
 
 import java.util.List;
+
+import javax.inject.Inject;
 
 public class GeofenceTransitionsIntentService extends IntentService {
     public static final String TAG = GeofenceTransitionsIntentService.class.getSimpleName();
 
-//    @Inject GeofenceRepository repository;
+    @Inject
+    SharedPrefsRepository repository;
 
     public GeofenceTransitionsIntentService() {
         super(TAG);
