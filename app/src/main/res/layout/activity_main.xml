@@ -14,13 +14,12 @@
         map:mapType="normal"
         map:uiZoomControls="true"
         map:uiZoomGestures="true"
-        android:layout_below="@+id/seek_bar_lt"/>
+        android:layout_below="@+id/details_lt"/>
 
     <RelativeLayout
-        android:id="@+id/seek_bar_lt"
+        android:id="@+id/details_lt"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:background="@color/colorPrimary">
+        android:layout_height="90dp">
 
         <TextView
             android:id="@+id/status_text"

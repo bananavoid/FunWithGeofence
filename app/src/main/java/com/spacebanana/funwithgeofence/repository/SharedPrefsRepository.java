@@ -84,11 +84,14 @@ public class SharedPrefsRepository {
         editor.apply();
     }
 
-    public void clearLocationData() {
+    public void clearData() {
         SharedPreferences.Editor editor = prefs.edit();
         editor.putLong(PREF_AREA_LAT, 0);
         editor.putLong(PREF_AREA_LON, 0);
         editor.putInt(PREF_AREA_RADIUS, 0);
+        editor.putString(PREF_NETWORK_NAME, "");
+        editor.putBoolean(PREF_IS_IN_AREA, false);
+        editor.putBoolean(PREF_IS_NETWORK_CONNECTED, false);
         editor.apply();
     }
 }

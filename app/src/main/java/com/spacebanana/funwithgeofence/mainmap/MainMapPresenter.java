@@ -47,7 +47,7 @@ public class MainMapPresenter extends Presenter<MainMap> implements SharedPrefer
         this.geofencingClient = gfClient;
         this.fusedLocationProviderClient = flProviderClient;
 
-        this.repository.clearLocationData();
+        this.repository.clearData();
         this.repository.setOnSharedPrefsListener(this);
     }
 
@@ -60,6 +60,10 @@ public class MainMapPresenter extends Presenter<MainMap> implements SharedPrefer
 
     public void setNetworkName(String networkName) {
         repository.setNetworkName(networkName);
+    }
+
+    public String getNetworkName() {
+        return repository.getNetworkName();
     }
 
     public Disposable getNetworkStateSubscription() {
@@ -81,7 +85,10 @@ public class MainMapPresenter extends Presenter<MainMap> implements SharedPrefer
                 .subscribe(new Consumer<Connectivity>() {
                     @Override
                     public void accept(final Connectivity connectivity) {
-                        String networkSSID = connectivity.getExtraInfo().toLowerCase().replace("\"", "");
+                        String networkSSID = connectivity.getExtraInfo().replace("\"", "");
+                        if (repository.getNetworkName().isEmpty())
+                            repository.setNetworkName(networkSSID);
+
                         if (networkSSID.equals(repository.getNetworkName()) && connectivity.getType() == ConnectivityManager.TYPE_WIFI) {
                             repository.setIsNetworkConnected(connectivity.isAvailable());
                         } else {
@@ -135,7 +142,7 @@ public class MainMapPresenter extends Presenter<MainMap> implements SharedPrefer
 
     @SuppressWarnings("MissingPermission")
     private void removeGeofences() {
-        repository.clearLocationData();
+        repository.clearData();
         geofencingClient.removeGeofences(getGeofencePendingIntent());
 
         if (geofenceList != null)

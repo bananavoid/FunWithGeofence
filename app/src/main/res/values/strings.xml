@@ -6,4 +6,10 @@
     <string name="name">Name</string>
     <string name="cancel">Cancel</string>
     <string name="ok">Ok</string>
+    <string name="status_not_available">Status is not available at the moment</string>
+    <string name="status_not_available_title">No status</string>
+    <string name="status_inside_title">Inside</string>
+    <string name="status_inside">You are inside the tracked area</string>
+    <string name="status_outside">Outside the tracked area and disconnected from tracked network</string>
+    <string name="status_outside_title">Outside</string>
 </resources>

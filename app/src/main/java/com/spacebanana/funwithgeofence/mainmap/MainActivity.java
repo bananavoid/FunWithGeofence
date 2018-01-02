@@ -18,6 +18,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -35,6 +36,8 @@ import com.spacebanana.funwithgeofence.FunWithGeofenceApplication;
 import com.spacebanana.funwithgeofence.geofence.GeofenceTransitionsIntentService;
 import com.spacebanana.funwithgeofence.R;
 
+import org.w3c.dom.Text;
+
 import javax.inject.Inject;
 
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback, MainMap {
@@ -49,9 +52,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private SeekBar.OnSeekBarChangeListener mRadiusSeekBarListener = new SeekBar.OnSeekBarChangeListener() {
         @Override
         public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-            TextView currentValueText = findViewById(R.id.current_value_text);
             currentValueText.setText(String.valueOf(i));
-
             if (circle != null) {
                 circle.setRadius(i);
             }
@@ -67,6 +68,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             addGeofence(circle.getCenter(), circle.getRadius());
         }
     };
+
+    private SeekBar radiusSeekBar;
+    private TextView currentValueText;
+    private TextView maxValueText;
+    private TextView statusText;
+    private RelativeLayout detailsLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,9 +129,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         builder.setTitle(R.string.set_network_name_title);
 
         final EditText input = new EditText(this);
+        input.setText(presenter.getNetworkName());
         input.setPadding(40,40,40,40);
-        input.setHint(R.string.name);
-        input.setHintTextColor(Color.GRAY);
         input.setTextColor(Color.BLACK);
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         builder.setView(input);
@@ -157,8 +163,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 setAreaOnMap(latLng, Constants.MIN_GEOFENCE_RADIUS);
             }
         });
-
-        findViewById(R.id.seek_bar_lt).setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -181,7 +185,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void showGeofenceStatus(boolean isInsideZone) {
-        getActionBar().setTitle(isInsideZone ? "CONNECTED" : "DISCONNECTED");
+        if (isInsideZone)
+            setViewsByStatus(R.drawable.status_inside_bg, getString(R.string.status_inside_title),
+                    getString(R.string.status_inside));
+        else
+            setViewsByStatus(R.drawable.status_outside_bg, getString(R.string.status_outside_title),
+                    getString(R.string.status_outside));
     }
 
     private void initSubscribers() {
@@ -218,19 +227,32 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void initViews() {
-        getActionBar().setTitle("NO STATUS");
-        presenter.setNetworkName("spacelobster");
+        radiusSeekBar = findViewById(R.id.radius_seek_bar);
+        radiusSeekBar.setProgress(Constants.MIN_GEOFENCE_RADIUS);
+        radiusSeekBar.setOnSeekBarChangeListener(mRadiusSeekBarListener);
 
-        SeekBar seekBar = findViewById(R.id.radius_seek_bar);
-        seekBar.setProgress(Constants.MIN_GEOFENCE_RADIUS);
-
-        TextView currentValueText = findViewById(R.id.current_value_text);
+        currentValueText = findViewById(R.id.current_value_text);
         currentValueText.setText(String.valueOf(Constants.MIN_GEOFENCE_RADIUS));
 
-        TextView maxValueText = findViewById(R.id.max_value_text);
+        maxValueText = findViewById(R.id.max_value_text);
         maxValueText.setText(String.valueOf(Constants.MAX_GEOFENCE_RADIUS));
 
-        seekBar.setOnSeekBarChangeListener(mRadiusSeekBarListener);
+        detailsLayout = findViewById(R.id.details_lt);
+
+        statusText = findViewById(R.id.status_text);
+
+//        setViewsByStatus(R.drawable.status_inside_bg, getString(R.string.status_inside_title),
+//                getString(R.string.status_inside));
+    }
+
+    private void setViewsByStatus(int drawable, String statusTitle, String status) {
+        if (getActionBar() != null) {
+            getActionBar().setTitle(statusTitle);
+            getActionBar().setBackgroundDrawable(getResources().getDrawable(drawable, null));
+        }
+
+        detailsLayout.setBackground(getResources().getDrawable(drawable, null));
+        statusText.setText(status);
     }
 
     private void findCurrentLocationAndSetOnMap() {
