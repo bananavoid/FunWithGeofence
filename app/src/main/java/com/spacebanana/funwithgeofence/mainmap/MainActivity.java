@@ -26,7 +26,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.spacebanana.funwithgeofence.Constants;
 import com.spacebanana.funwithgeofence.FunWithGeofenceApplication;
-import com.spacebanana.funwithgeofence.GeofenceTransitionsIntentService;
+import com.spacebanana.funwithgeofence.geofence.GeofenceTransitionsIntentService;
 import com.spacebanana.funwithgeofence.R;
 
 import javax.inject.Inject;

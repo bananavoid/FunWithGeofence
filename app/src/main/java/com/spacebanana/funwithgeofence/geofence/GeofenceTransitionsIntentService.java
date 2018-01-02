@@ -1,11 +1,11 @@
-package com.spacebanana.funwithgeofence;
+package com.spacebanana.funwithgeofence.geofence;
 
 import android.app.IntentService;
 import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
+import com.spacebanana.funwithgeofence.FunWithGeofenceApplication;
 import com.spacebanana.funwithgeofence.repository.SharedPrefsRepository;
 
 import javax.inject.Inject;

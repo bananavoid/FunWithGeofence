@@ -8,6 +8,4 @@ public class Constants {
             GEOFENCE_EXPIRATION_H * 60 * 60 * 1000;
 
     public static final String GEOFENCE_REQUEST_ID = "area_51";
-    public static final String ACTION_RECEIVE_GEOFENCE = "geofence_receive";
-    public static final String EXTRA_GEOFENCE_TRANSITION = "geofence_transition";
 }
