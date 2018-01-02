@@ -12,7 +12,8 @@ import static android.content.Context.MODE_PRIVATE;
 public class SharedPrefsRepository {
     private static final String SHARED_PREFS = "area_shared_prefs";
     private static final String PREF_AREA_LAT = "area_lat";
-    private static final String PREF_IS_IN_AREA = "is_in_area";
+    public static final String PREF_IS_IN_AREA = "is_in_area";
+    public static final String PREF_IS_NETWORK_CONNECTED = "is_network_connected";
     private static final String PREF_AREA_LON = "area_lon";
     private static final String PREF_AREA_RADIUS = "area_radius";
     private static final String PREF_NETWORK_NAME = "network_name";
@@ -21,6 +22,18 @@ public class SharedPrefsRepository {
 
     @Inject public SharedPrefsRepository() {
         prefs = FunWithGeofenceApplication.get().getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+    }
+
+    public void setOnSharedPrefsListener(SharedPreferences.OnSharedPreferenceChangeListener listener) {
+        prefs.registerOnSharedPreferenceChangeListener(listener);
+    }
+
+    public boolean isNetworkConnected() {
+        return this.prefs.getBoolean(PREF_IS_NETWORK_CONNECTED, false);
+    }
+
+    public void setIsNetworkConnected(boolean isNetworkConnected) {
+        this.prefs.edit().putBoolean(PREF_IS_NETWORK_CONNECTED, isNetworkConnected).apply();
     }
 
     public boolean isInArea() {

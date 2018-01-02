@@ -208,9 +208,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void addGeofence(LatLng point, Double radius) {
-        Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
-        PendingIntent pendingIntent = PendingIntent.getService(this, GEOFENCE_REQUEST_CODE, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-        presenter.addGeofenceArea(pendingIntent, point, radius.intValue());
+        if (presenter.getGeofencePendingIntent() == null){
+            Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
+            PendingIntent pendingIntent = PendingIntent.getService(this, GEOFENCE_REQUEST_CODE, intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+            presenter.setGeofencePendingIntent(pendingIntent);
+        }
+
+        presenter.addGeofenceArea(point, radius.intValue());
     }
 }

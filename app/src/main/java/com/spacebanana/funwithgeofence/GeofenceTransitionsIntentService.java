@@ -2,12 +2,14 @@ package com.spacebanana.funwithgeofence;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 import com.spacebanana.funwithgeofence.repository.SharedPrefsRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -34,11 +36,11 @@ public class GeofenceTransitionsIntentService extends IntentService {
         }
 
         int geofenceTransition = geofencingEvent.getGeofenceTransition();
-        if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
-                geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
-            List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
-        } else {
+        boolean storedAreaStatus = repository.isInArea();
+        boolean currentStatus = geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
+                geofenceTransition == Geofence.GEOFENCE_TRANSITION_DWELL;
 
-        }
+        if (storedAreaStatus != currentStatus)
+            repository.setIsInArea(currentStatus);
     }
 }

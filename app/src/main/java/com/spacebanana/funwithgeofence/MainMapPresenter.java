@@ -3,6 +3,7 @@ package com.spacebanana.funwithgeofence;
 
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.support.annotation.NonNull;
 
@@ -28,12 +29,13 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
-public class MainMapPresenter extends Presenter<MainMap> implements OnCompleteListener<Void> {
+public class MainMapPresenter extends Presenter<MainMap> implements SharedPreferences.OnSharedPreferenceChangeListener {
     private final SharedPrefsRepository repository;
     private final GeofencingClient geofencingClient;
     private String networkName;
     private Disposable networkStateSubscription;
     private PendingIntent geofencePendingIntent;
+    private boolean isConnected;
 
     @Inject
     public MainMapPresenter(SharedPrefsRepository repository, GeofencingClient gfClient) {
@@ -45,6 +47,7 @@ public class MainMapPresenter extends Presenter<MainMap> implements OnCompleteLi
     @Override
     protected void onTakeView(MainMap view) {
         super.onTakeView(view);
+        repository.setOnSharedPrefsListener(this);
     }
 
     public void subscribeOnNetworkStateChange(Context context) {
@@ -56,16 +59,14 @@ public class MainMapPresenter extends Presenter<MainMap> implements OnCompleteLi
                     public void accept(final Connectivity connectivity) {
                         String networkSSID = connectivity.getExtraInfo().toLowerCase().replace("\"", "");
                         if (networkSSID.equals(getNetworkName()) && connectivity.getType() == ConnectivityManager.TYPE_WIFI) {
-                            getView().showGeofenceStatus(connectivity.isAvailable());
+                            repository.setIsNetworkConnected(connectivity.isAvailable());
                         } else {
-                            checkGeofenceArea();
+                            repository.setIsNetworkConnected(false);
                         }
+
+                        applyStatusChange();
                     }
                 });
-    }
-
-    private void checkGeofenceArea() {
-        getView().showGeofenceStatus(false);
     }
 
     public String getNetworkName() {
@@ -90,14 +91,12 @@ public class MainMapPresenter extends Presenter<MainMap> implements OnCompleteLi
     }
 
     @SuppressWarnings("MissingPermission")
-    public void addGeofenceArea(PendingIntent intent, LatLng centralPoint, int radius) {
+    public void addGeofenceArea(LatLng centralPoint, int radius) {
         //only one geofence are is allowed, clearing up
         removeGeofences();
 
-        setGeofencePendingIntent(intent);
-
         Geofence geofence = new Geofence.Builder()
-                .setRequestId("geofence")
+                .setRequestId(Constants.GEOFENCE_REQUEST_ID)
                 .setCircularRegion(
                         centralPoint.latitude,
                         centralPoint.longitude,
@@ -110,8 +109,7 @@ public class MainMapPresenter extends Presenter<MainMap> implements OnCompleteLi
         List<Geofence> geofenceList = new ArrayList<>(1);
         geofenceList.add(geofence);
 
-        geofencingClient.addGeofences(getGeofencingRequest(geofenceList), getGeofencePendingIntent())
-                .addOnCompleteListener(this);
+        geofencingClient.addGeofences(getGeofencingRequest(geofenceList), getGeofencePendingIntent());
 
         repository.saveLocationData(centralPoint, radius);
     }
@@ -119,7 +117,15 @@ public class MainMapPresenter extends Presenter<MainMap> implements OnCompleteLi
     @SuppressWarnings("MissingPermission")
     private void removeGeofences() {
         repository.clearLocationData();
-        geofencingClient.removeGeofences(getGeofencePendingIntent()).addOnCompleteListener(this);
+        geofencingClient.removeGeofences(getGeofencePendingIntent());
+    }
+
+    private void applyStatusChange() {
+        boolean isInTheArea = repository.isNetworkConnected() && repository.isInArea() || repository.isNetworkConnected();
+        if (isInTheArea != isConnected) {
+            isConnected = isInTheArea;
+            getView().showGeofenceStatus(isConnected);
+        }
     }
 
     private GeofencingRequest getGeofencingRequest(List<Geofence> geofenceList) {
@@ -130,6 +136,9 @@ public class MainMapPresenter extends Presenter<MainMap> implements OnCompleteLi
     }
 
     @Override
-    public void onComplete(@NonNull Task<Void> task) {
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+        if (s.equals(SharedPrefsRepository.PREF_IS_IN_AREA)) {
+            applyStatusChange();
+        }
     }
 }
