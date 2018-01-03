@@ -3,14 +3,11 @@ package com.spacebanana.funwithgeofence.mainmap;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.location.Location;
 import android.net.ConnectivityManager;
 
-import com.github.pwittchen.reactivenetwork.library.rx2.Connectivity;
 import com.github.pwittchen.reactivenetwork.library.rx2.ReactiveNetwork;
 import com.github.pwittchen.reactivenetwork.library.rx2.network.observing.strategy.LollipopNetworkObservingStrategy;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.spacebanana.funwithgeofence.utils.Constants;
 import com.spacebanana.funwithgeofence.repository.GeofenceRepository;
 import com.spacebanana.funwithgeofence.rxviper.Presenter;
@@ -20,7 +17,6 @@ import javax.inject.Inject;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 public class MainMapPresenter extends Presenter<MainMap> implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -64,33 +60,27 @@ public class MainMapPresenter extends Presenter<MainMap> implements SharedPrefer
         networkStateSubscription = ReactiveNetwork.observeNetworkConnectivity(context, new LollipopNetworkObservingStrategy())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<Connectivity>() {
-                    @Override
-                    public void accept(final Connectivity connectivity) {
-                        String networkSSID = connectivity.getExtraInfo().replace("\"", "");
-                        if (getNetworkName().isEmpty())
-                            setNetworkName(networkSSID);
+                .subscribe(connectivity -> {
+                    String networkSSID = connectivity.getExtraInfo().replace("\"", "");
+                    if (getNetworkName().isEmpty())
+                        setNetworkName(networkSSID);
 
-                        if (networkSSID.equals(repository.getNetworkName()) && connectivity.getType() == ConnectivityManager.TYPE_WIFI) {
-                            repository.setIsNetworkConnected(connectivity.isAvailable());
-                        } else {
-                            repository.setIsNetworkConnected(false);
-                        }
-
-                        applyStatusChange();
+                    if (networkSSID.equals(repository.getNetworkName()) && connectivity.getType() == ConnectivityManager.TYPE_WIFI) {
+                        repository.setIsNetworkConnected(connectivity.isAvailable());
+                    } else {
+                        repository.setIsNetworkConnected(false);
                     }
+
+                    applyStatusChange();
                 });
     }
 
     @SuppressWarnings("MissingPermission")
     public void addGeofenceToCurrentLocation() {
         repository.getFusedLocationProviderClient().getLastLocation()
-                .addOnSuccessListener(new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        if (location != null) {
-                            getView().showGeofenceArea(location.getLatitude(), location.getLongitude(), Constants.MIN_GEOFENCE_RADIUS);
-                        }
+                .addOnSuccessListener(location -> {
+                    if (location != null && getView() != null) {
+                        getView().showGeofenceArea(location.getLatitude(), location.getLongitude(), Constants.MIN_GEOFENCE_RADIUS);
                     }
                 });
     }
@@ -111,13 +101,10 @@ public class MainMapPresenter extends Presenter<MainMap> implements SharedPrefer
     @SuppressWarnings("MissingPermission")
     private void setIsCurrentLocationInArea() {
         repository.getFusedLocationProviderClient().getLastLocation()
-                .addOnSuccessListener(new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        if (location != null) {
-                            repository.setIsInAreaByLocation(location);
-                            applyStatusChange();
-                        }
+                .addOnSuccessListener(location -> {
+                    if (location != null) {
+                        repository.setIsInAreaByLocation(location);
+                        applyStatusChange();
                     }
                 });
     }

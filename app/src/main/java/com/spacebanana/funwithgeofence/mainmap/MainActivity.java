@@ -2,9 +2,6 @@ package com.spacebanana.funwithgeofence.mainmap;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.PendingIntent;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
@@ -32,7 +29,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.spacebanana.funwithgeofence.utils.Constants;
 import com.spacebanana.funwithgeofence.FunWithGeofenceApplication;
-import com.spacebanana.funwithgeofence.geofence.GeofenceIntentService;
 import com.spacebanana.funwithgeofence.R;
 
 import javax.inject.Inject;
@@ -45,7 +41,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     private GoogleMap googleMap;
     private Circle circle;
-    private SeekBar.OnSeekBarChangeListener mRadiusSeekBarListener = new SeekBar.OnSeekBarChangeListener() {
+    private final SeekBar.OnSeekBarChangeListener radiusSeekBarListener = new SeekBar.OnSeekBarChangeListener() {
         @Override
         public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
             currentValueText.setText(String.valueOf(i));
@@ -65,11 +61,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         }
     };
 
-    private SeekBar radiusSeekBar;
     private TextView currentValueText;
-    private TextView maxValueText;
     private TextView statusText;
     private RelativeLayout detailsLayout;
+    private SeekBar radiusSeekBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,19 +126,11 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         input.setText(presenter.getNetworkName());
         builder.setView(input);
 
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (!input.getText().toString().isEmpty())
-                    presenter.setNetworkName(input.getText().toString());
-            }
+        builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
+            if (!input.getText().toString().isEmpty())
+                presenter.setNetworkName(input.getText().toString());
         });
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
+        builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> dialog.cancel());
 
         builder.show();
     }
@@ -154,12 +141,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         findCurrentLocationAndSetOnMap();
 
-        this.googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
-            @Override
-            public void onMapLongClick(LatLng latLng) {
-                setAreaOnMap(latLng, Constants.MIN_GEOFENCE_RADIUS);
-            }
-        });
+        this.googleMap.setOnMapLongClickListener(latLng -> setAreaOnMap(latLng, Constants.MIN_GEOFENCE_RADIUS));
     }
 
     @Override
@@ -214,6 +196,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 .build()
         ));
 
+        radiusSeekBar.setProgress(radius);
+        currentValueText.setText(String.valueOf(radius));
+
         setGeofence(latLng, circle.getRadius());
     }
 
@@ -226,12 +211,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private void initViews() {
         radiusSeekBar = findViewById(R.id.radius_seek_bar);
         radiusSeekBar.setProgress(Constants.MIN_GEOFENCE_RADIUS);
-        radiusSeekBar.setOnSeekBarChangeListener(mRadiusSeekBarListener);
+        radiusSeekBar.setOnSeekBarChangeListener(radiusSeekBarListener);
 
         currentValueText = findViewById(R.id.current_value_text);
         currentValueText.setText(String.valueOf(Constants.MIN_GEOFENCE_RADIUS));
 
-        maxValueText = findViewById(R.id.max_value_text);
+        TextView maxValueText = findViewById(R.id.max_value_text);
         maxValueText.setText(String.valueOf(Constants.MAX_GEOFENCE_RADIUS));
 
         detailsLayout = findViewById(R.id.details_lt);

@@ -12,7 +12,7 @@ import dagger.Provides;
 @Module
 public class AppModule {
 
-    private FunWithGeofenceApplication application;
+    private final FunWithGeofenceApplication application;
 
     public AppModule(FunWithGeofenceApplication application) {
         this.application = application;

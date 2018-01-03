@@ -14,7 +14,6 @@ import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.maps.model.LatLng;
 import com.spacebanana.funwithgeofence.FunWithGeofenceApplication;
 import com.spacebanana.funwithgeofence.geofence.GeofenceIntentService;
-import com.spacebanana.funwithgeofence.mainmap.MainMapPresenter;
 import com.spacebanana.funwithgeofence.utils.Constants;
 import com.spacebanana.funwithgeofence.utils.SharedPrefsUtils;
 

@@ -23,9 +23,6 @@ import static com.spacebanana.funwithgeofence.rxviper.RxViper.getProxy;
 import static com.spacebanana.funwithgeofence.rxviper.RxViper.requireNotNull;
 
 /**
- * Contains view logic for preparing content for display (as received from the {@link Interactor}) and for reacting to user inputs (by
- * requesting new data from the Interactor).
- * <p>
  * Contains additional routing logic for switching screens.
  *
  * @author Dmytro Zaitsev
