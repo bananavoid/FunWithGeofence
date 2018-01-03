@@ -1,31 +1,20 @@
 package com.spacebanana.funwithgeofence.mainmap;
 
 
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.net.ConnectivityManager;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
-import android.widget.Toast;
 
 import com.github.pwittchen.reactivenetwork.library.rx2.Connectivity;
 import com.github.pwittchen.reactivenetwork.library.rx2.ReactiveNetwork;
 import com.github.pwittchen.reactivenetwork.library.rx2.network.observing.strategy.LollipopNetworkObservingStrategy;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.Geofence;
-import com.google.android.gms.location.GeofencingClient;
-import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.spacebanana.funwithgeofence.FunWithGeofenceApplication;
 import com.spacebanana.funwithgeofence.utils.Constants;
-import com.spacebanana.funwithgeofence.repository.SharedPrefsRepository;
+import com.spacebanana.funwithgeofence.repository.GeofenceRepository;
 import com.spacebanana.funwithgeofence.rxviper.Presenter;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.spacebanana.funwithgeofence.utils.SharedPrefsUtils;
 
 import javax.inject.Inject;
 
@@ -35,34 +24,28 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 public class MainMapPresenter extends Presenter<MainMap> implements SharedPreferences.OnSharedPreferenceChangeListener {
-    private final SharedPrefsRepository repository;
-    private final GeofencingClient geofencingClient;
-    private final FusedLocationProviderClient fusedLocationProviderClient;
+    private final GeofenceRepository repository;
 
     private Disposable networkStateSubscription;
-    private PendingIntent geofencePendingIntent;
-    private ArrayList<Geofence> geofenceList;
     private boolean isConnected;
 
     @Inject
-    public MainMapPresenter(SharedPrefsRepository repository, GeofencingClient gfClient, FusedLocationProviderClient flProviderClient) {
+    public MainMapPresenter(GeofenceRepository repository) {
         super();
         this.repository = repository;
-        this.geofencingClient = gfClient;
-        this.fusedLocationProviderClient = flProviderClient;
 
         defaultInit();
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
-        if (s.equals(SharedPrefsRepository.PREF_IS_IN_AREA)) {
+        if (s.equals(SharedPrefsUtils.PREF_IS_IN_AREA)) {
             applyStatusChange();
         }
     }
 
     public void setNetworkName(String networkName) {
-        String currentlyConnectedTo = getConnectedNetworkName().replace("\"", "");
+        String currentlyConnectedTo = repository.getConnectedNetworkName().replace("\"", "");
 
         repository.setNetworkName(networkName);
         repository.setIsNetworkConnected(!currentlyConnectedTo.isEmpty() && currentlyConnectedTo.equals(networkName));
@@ -75,14 +58,6 @@ public class MainMapPresenter extends Presenter<MainMap> implements SharedPrefer
 
     public Disposable getNetworkStateSubscription() {
         return networkStateSubscription;
-    }
-
-    public PendingIntent getGeofencePendingIntent() {
-        return geofencePendingIntent;
-    }
-
-    public void setGeofencePendingIntent(PendingIntent geofencePendingIntent) {
-        this.geofencePendingIntent = geofencePendingIntent;
     }
 
     public void subscribeOnNetworkStateChange(Context context) {
@@ -109,7 +84,7 @@ public class MainMapPresenter extends Presenter<MainMap> implements SharedPrefer
 
     @SuppressWarnings("MissingPermission")
     public void addGeofenceToCurrentLocation() {
-        fusedLocationProviderClient.getLastLocation()
+        repository.getFusedLocationProviderClient().getLastLocation()
                 .addOnSuccessListener(new OnSuccessListener<Location>() {
                     @Override
                     public void onSuccess(Location location) {
@@ -122,85 +97,35 @@ public class MainMapPresenter extends Presenter<MainMap> implements SharedPrefer
 
     @SuppressWarnings("MissingPermission")
     public void addGeofenceArea(LatLng centralPoint, int radius) {
-        //only one geofence are is allowed, clearing up
-        removeGeofences();
-
-        Geofence geofence = new Geofence.Builder()
-                .setRequestId(Constants.GEOFENCE_REQUEST_ID)
-                .setCircularRegion(
-                        centralPoint.latitude,
-                        centralPoint.longitude,
-                        radius
-                )
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER |
-                        Geofence.GEOFENCE_TRANSITION_EXIT)
-                .setExpirationDuration(Constants.GEOFENCE_EXPIRATION_MS)
-                .build();
-
-        if (geofenceList == null)
-            geofenceList = new ArrayList<>(1);
-
-        geofenceList.add(geofence);
-
-        geofencingClient.addGeofences(getGeofencingRequest(geofenceList), getGeofencePendingIntent());
-        repository.saveLocationData(centralPoint, radius);
-
+        repository.updateGeofenceArea(centralPoint, radius);
         setIsCurrentLocationInArea();
     }
 
     private void defaultInit() {
-        repository.clearData();
+        repository.clearStoredLocationData();
         repository.setIsNetworkConnected(false);
         repository.setNetworkName("");
         repository.setOnSharedPrefsListener(this);
     }
 
-    private String getConnectedNetworkName() {
-        WifiManager wifiManager = (WifiManager) FunWithGeofenceApplication.get().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        return wifiManager != null ? wifiManager.getConnectionInfo().getSSID() : "";
-    }
-
     @SuppressWarnings("MissingPermission")
     private void setIsCurrentLocationInArea() {
-        fusedLocationProviderClient.getLastLocation()
+        repository.getFusedLocationProviderClient().getLastLocation()
                 .addOnSuccessListener(new OnSuccessListener<Location>() {
                     @Override
                     public void onSuccess(Location location) {
                         if (location != null) {
-                            float[] distance = new float[2];
-
-                            Location.distanceBetween(location.getLatitude(), location.getLongitude(),
-                                    repository.getAreaLatitude(), repository.getAreaLontitude(), distance);
-
-                            repository.setIsInArea(distance[0] < repository.getAreaRadius());
-
+                            repository.setIsInAreaByLocation(location);
                             applyStatusChange();
                         }
                     }
                 });
     }
 
-    @SuppressWarnings("MissingPermission")
-    private void removeGeofences() {
-        repository.clearData();
-        geofencingClient.removeGeofences(getGeofencePendingIntent());
-
-        if (geofenceList != null)
-            geofenceList.clear();
-    }
-
     private void applyStatusChange() {
-        boolean isInTheArea = repository.isNetworkConnected() || repository.isInArea();
-        if (isInTheArea != isConnected) {
-            isConnected = isInTheArea;
+        if (repository.isInsideAreaOrConnected() != isConnected) {
+            isConnected = repository.isInsideAreaOrConnected();
             getView().showGeofenceStatus(isConnected);
         }
-    }
-
-    private GeofencingRequest getGeofencingRequest(List<Geofence> geofenceList) {
-        GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
-        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER | GeofencingRequest.INITIAL_TRIGGER_EXIT);
-        builder.addGeofences(geofenceList);
-        return builder.build();
     }
 }

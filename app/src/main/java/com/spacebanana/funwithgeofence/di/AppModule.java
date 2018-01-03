@@ -4,6 +4,7 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.LocationServices;
 import com.spacebanana.funwithgeofence.FunWithGeofenceApplication;
+import com.spacebanana.funwithgeofence.utils.SharedPrefsUtils;
 
 import dagger.Module;
 import dagger.Provides;
@@ -27,5 +28,10 @@ public class AppModule {
 
     @Provides FusedLocationProviderClient provideFusedLocationClient() {
         return LocationServices.getFusedLocationProviderClient(application);
+    }
+
+    @Provides
+    SharedPrefsUtils provideSharedPrefsUtils() {
+        return new SharedPrefsUtils();
     }
 }

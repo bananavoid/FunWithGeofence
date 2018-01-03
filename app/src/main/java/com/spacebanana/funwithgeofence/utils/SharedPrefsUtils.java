@@ -1,4 +1,4 @@
-package com.spacebanana.funwithgeofence.repository;
+package com.spacebanana.funwithgeofence.utils;
 
 import android.content.SharedPreferences;
 
@@ -9,7 +9,7 @@ import javax.inject.Inject;
 
 import static android.content.Context.MODE_PRIVATE;
 
-public class SharedPrefsRepository {
+public class SharedPrefsUtils {
     private static final String SHARED_PREFS = "area_shared_prefs";
     private static final String PREF_AREA_LAT = "area_lat";
     public static final String PREF_IS_IN_AREA = "is_in_area";
@@ -20,7 +20,8 @@ public class SharedPrefsRepository {
 
     private final SharedPreferences prefs;
 
-    @Inject public SharedPrefsRepository() {
+    @Inject
+    public SharedPrefsUtils() {
         prefs = FunWithGeofenceApplication.get().getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
     }
 
