@@ -6,6 +6,7 @@ import android.content.Intent;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 import com.spacebanana.funwithgeofence.FunWithGeofenceApplication;
+import com.spacebanana.funwithgeofence.mainmap.MainActivity;
 import com.spacebanana.funwithgeofence.repository.GeofenceRepository;
 
 import javax.inject.Inject;
@@ -18,13 +19,15 @@ public class GeofenceIntentService extends IntentService {
 
     public GeofenceIntentService() {
         super(TAG);
-
-        FunWithGeofenceApplication.get().getInjector().inject(this);
+        init();
     }
 
     public GeofenceIntentService(String name) {
         super(name);
+        init();
+    }
 
+    private void init() {
         FunWithGeofenceApplication.get().getInjector().inject(this);
     }
 
@@ -41,7 +44,8 @@ public class GeofenceIntentService extends IntentService {
         boolean currentStatus = geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
                 geofenceTransition == Geofence.GEOFENCE_TRANSITION_DWELL;
 
-        if (storedAreaStatus != currentStatus)
+        if (storedAreaStatus != currentStatus) {
             repository.setIsInsideArea(currentStatus);
+        }
     }
 }

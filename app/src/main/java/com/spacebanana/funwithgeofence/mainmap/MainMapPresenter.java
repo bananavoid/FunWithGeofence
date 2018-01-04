@@ -15,6 +15,7 @@ public class MainMapPresenter extends Presenter<MainMap>  {
     public MainMapPresenter(GeofenceRepository repository) {
         super();
         this.repository = repository;
+        this.repository.defaultInit();
     }
 
     @Override
@@ -27,6 +28,8 @@ public class MainMapPresenter extends Presenter<MainMap>  {
         repository.subscribeOnNetworkStateChange().subscribe(
                 aBoolean -> getView().showGeofenceStatus(aBoolean)
         );
+
+        repository.subscribeOnGeofenceAreaStatusChange().subscribe(aBoolean -> getView().showGeofenceStatus(aBoolean));
     }
 
     void setNetworkName(String networkName) {

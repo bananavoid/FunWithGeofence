@@ -3,7 +3,6 @@ package com.spacebanana.funwithgeofence.repository;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
@@ -26,11 +25,13 @@ import java.util.List;
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class GeofenceRepository implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class GeofenceRepository {
     private static final int GEOFENCE_REQUEST_CODE = 543;
 
     private final GeofencingClient geofencingClient;
@@ -45,22 +46,12 @@ public class GeofenceRepository implements SharedPreferences.OnSharedPreferenceC
         this.geofencingClient = gfClient;
         this.fusedLocationProviderClient = flProviderClient;
         this.sharedPrefsUtils = sharedPrefsUtils;
-
-        defaultInit();
     }
 
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
-        if (s.equals(SharedPrefsUtils.PREF_IS_IN_AREA)) {
-            //applyStatusChange();
-        }
-    }
-
-    private void defaultInit() {
+    public void defaultInit() {
         clearStoredLocationData();
-        setIsNetworkConnected(false);
-        setNetworkName("");
-        setOnSharedPrefsListener(this);
+        sharedPrefsUtils.setIsNetworkConnected(false);
+        sharedPrefsUtils.setNetworkName("");
     }
 
     public Observable<Boolean> subscribeOnNetworkStateChange() {
@@ -84,9 +75,19 @@ public class GeofenceRepository implements SharedPreferences.OnSharedPreferenceC
                 }));
     }
 
+    public Observable<Boolean> subscribeOnGeofenceAreaStatusChange() {
+        return Observable.create(e ->
+                sharedPrefsUtils.setOnSharedPrefsListener((sharedPreferences, s) -> {
+                    if (s.equals(SharedPrefsUtils.PREF_IS_IN_AREA)) {
+                        e.onNext(isInsideAreaOrConnected());
+                    }
+                })
+        );
+    }
+
     @SuppressWarnings("MissingPermission")
     public Observable<GeofencePoint> addGeofenceArea(double latitude, double longtitude, int radius) {
-        return Observable.create(e -> getFusedLocationProviderClient().getLastLocation()
+        return Observable.create(e -> fusedLocationProviderClient.getLastLocation()
                 .addOnSuccessListener(location -> {
                     if (location != null) {
                         double lat, lon;
@@ -108,7 +109,7 @@ public class GeofenceRepository implements SharedPreferences.OnSharedPreferenceC
 
     public Observable<Boolean> setNetworkName(String networkName) {
         return Observable.create(e -> {
-            setNetworkName(networkName);
+            sharedPrefsUtils.setNetworkName(networkName);
             String currentlyConnectedTo = getConnectedNetworkName().replace("\"", "");
             setIsNetworkConnected(!currentlyConnectedTo.isEmpty() && currentlyConnectedTo.equals(networkName));
             e.onNext(isInsideAreaOrConnected());
@@ -133,10 +134,6 @@ public class GeofenceRepository implements SharedPreferences.OnSharedPreferenceC
         return geofencePendingIntent;
     }
 
-    private FusedLocationProviderClient getFusedLocationProviderClient() {
-        return fusedLocationProviderClient;
-    }
-
     private boolean isInsideAreaOrConnected() {
         return sharedPrefsUtils.isNetworkConnected() || sharedPrefsUtils.isInArea();
     }
@@ -149,12 +146,8 @@ public class GeofenceRepository implements SharedPreferences.OnSharedPreferenceC
         sharedPrefsUtils.setIsInArea(b);
     }
 
-    public void clearStoredLocationData() {
+    private void clearStoredLocationData() {
         sharedPrefsUtils.clearData();
-    }
-
-    private void setOnSharedPrefsListener(SharedPreferences.OnSharedPreferenceChangeListener listener) {
-        sharedPrefsUtils.setOnSharedPrefsListener(listener);
     }
 
     private String getConnectedNetworkName() {
@@ -162,12 +155,10 @@ public class GeofenceRepository implements SharedPreferences.OnSharedPreferenceC
         return wifiManager != null ? wifiManager.getConnectionInfo().getSSID() : "";
     }
 
-    private void setIsInAreaByLocation(Location currentLocation) {
+    private void setIsInAreaByLocation(Location location) {
         float[] distance = new float[2];
-
-        Location.distanceBetween(currentLocation.getLatitude(), currentLocation.getLongitude(),
+        Location.distanceBetween(location.getLatitude(), location.getLongitude(),
                 sharedPrefsUtils.getAreaLatitude(), sharedPrefsUtils.getAreaLontitude(), distance);
-
         sharedPrefsUtils.setIsInArea(distance[0] < sharedPrefsUtils.getAreaRadius());
     }
 
