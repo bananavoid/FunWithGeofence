@@ -74,7 +74,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         initMap();
         initViews();
-        initSubscribers();
     }
 
     @Override
@@ -172,10 +171,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         builder.show();
     }
 
-    private void initSubscribers() {
-        presenter.subscribeOnNetworkStateChange(this);
-    }
-
     private void setAreaOnMap(LatLng latLng, int radius) {
         googleMap.clear();
 
@@ -239,11 +234,11 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                     ACCESS_LOCATION_REQUEST_CODE);
         } else {
             googleMap.setMyLocationEnabled(true);
-            presenter.addGeofenceToCurrentLocation();
+            presenter.updateGeofenceArea(0,0,Constants.MIN_GEOFENCE_RADIUS);
         }
     }
 
     public void setGeofence(LatLng point, int radius) {
-        presenter.addGeofenceArea(point, radius);
+        presenter.updateGeofenceArea(point.latitude, point.longitude, radius);
     }
 }

@@ -77,10 +77,10 @@ public class SharedPrefsUtils {
         this.prefs.edit().putString(PREF_NETWORK_NAME, value).apply();
     }
 
-    public void saveLocationData(LatLng areaCenterPoint, int radius) {
+    public void saveLocationData(double latitude, double longitude, int radius) {
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putLong(PREF_AREA_LAT, Double.doubleToRawLongBits(areaCenterPoint.latitude));
-        editor.putLong(PREF_AREA_LON, Double.doubleToRawLongBits(areaCenterPoint.longitude));
+        editor.putLong(PREF_AREA_LAT, Double.doubleToRawLongBits(latitude));
+        editor.putLong(PREF_AREA_LON, Double.doubleToRawLongBits(longitude));
         editor.putInt(PREF_AREA_RADIUS, radius);
         editor.apply();
     }
