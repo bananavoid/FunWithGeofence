@@ -89,6 +89,7 @@ public class MainMapPresenter extends Presenter<MainMap> implements SharedPrefer
     public void addGeofenceArea(LatLng centralPoint, int radius) {
         repository.updateGeofenceArea(centralPoint, radius);
         setIsCurrentLocationInArea();
+        getView().showGeofenceArea(centralPoint.latitude, centralPoint.longitude, radius);
     }
 
     private void defaultInit() {

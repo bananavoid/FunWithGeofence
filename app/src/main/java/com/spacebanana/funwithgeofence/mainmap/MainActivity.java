@@ -57,7 +57,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
-            setGeofence(circle.getCenter(), circle.getRadius());
+            setGeofence(circle.getCenter(), ((Double)circle.getRadius()).intValue());
         }
     };
 
@@ -115,33 +115,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    private void showSetNetworkDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogTheme));
-        builder.setTitle(R.string.set_network_name_title);
-
-        final EditText input = new EditText(this);
-        input.setPadding(40,40,40,40);
-        input.setTextColor(Color.BLACK);
-        input.setInputType(InputType.TYPE_CLASS_TEXT);
-        input.setText(presenter.getNetworkName());
-        builder.setView(input);
-
-        builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
-            if (!input.getText().toString().isEmpty())
-                presenter.setNetworkName(input.getText().toString());
-        });
-        builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> dialog.cancel());
-
-        builder.show();
-    }
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.googleMap = googleMap;
 
         findCurrentLocationAndSetOnMap();
 
-        this.googleMap.setOnMapLongClickListener(latLng -> setAreaOnMap(latLng, Constants.MIN_GEOFENCE_RADIUS));
+        this.googleMap.setOnMapLongClickListener(latLng -> setGeofence(latLng, Constants.MIN_GEOFENCE_RADIUS));
     }
 
     @Override
@@ -172,6 +152,26 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                     getString(R.string.status_outside));
     }
 
+    private void showSetNetworkDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogTheme));
+        builder.setTitle(R.string.set_network_name_title);
+
+        final EditText input = new EditText(this);
+        input.setPadding(40,40,40,40);
+        input.setTextColor(Color.BLACK);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        input.setText(presenter.getNetworkName());
+        builder.setView(input);
+
+        builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
+            if (!input.getText().toString().isEmpty())
+                presenter.setNetworkName(input.getText().toString());
+        });
+        builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> dialog.cancel());
+
+        builder.show();
+    }
+
     private void initSubscribers() {
         presenter.subscribeOnNetworkStateChange(this);
     }
@@ -198,8 +198,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         radiusSeekBar.setProgress(radius);
         currentValueText.setText(String.valueOf(radius));
-
-        setGeofence(latLng, circle.getRadius());
     }
 
     private void initMap() {
@@ -224,17 +222,17 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         statusText = findViewById(R.id.status_text);
     }
 
-    private void setViewsByStatus(int drawable, String statusTitle, String status) {
+    private void setViewsByStatus(int bgDrawable, String statusTitle, String status) {
         if (getActionBar() != null) {
             getActionBar().setTitle(statusTitle);
-            getActionBar().setBackgroundDrawable(getResources().getDrawable(drawable, null));
+            getActionBar().setBackgroundDrawable(getResources().getDrawable(bgDrawable, null));
         }
 
-        detailsLayout.setBackground(getResources().getDrawable(drawable, null));
+        detailsLayout.setBackground(getResources().getDrawable(bgDrawable, null));
         statusText.setText(status);
     }
 
-    private void findCurrentLocationAndSetOnMap() {
+    public void findCurrentLocationAndSetOnMap() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
@@ -245,7 +243,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    private void setGeofence(LatLng point, Double radius) {
-        presenter.addGeofenceArea(point, radius.intValue());
+    public void setGeofence(LatLng point, int radius) {
+        presenter.addGeofenceArea(point, radius);
     }
 }
