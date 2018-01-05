@@ -100,7 +100,6 @@ public class GeofenceRepository {
                         }
 
                         updateGeofenceArea(lat, lon, radius);
-
                         setIsInAreaByLocation(location);
                         e.onNext(new GeofencePoint(lat, lon, radius, isInsideAreaOrConnected()));
                     }
@@ -120,8 +119,12 @@ public class GeofenceRepository {
         return sharedPrefsUtils.getNetworkName();
     }
 
-    private void setIsNetworkConnected(boolean b) {
+    public void setIsNetworkConnected(boolean b) {
         sharedPrefsUtils.setIsNetworkConnected(b);
+    }
+
+    public boolean isNetworkConnected() {
+        return sharedPrefsUtils.isNetworkConnected();
     }
 
     private PendingIntent getGeofencePendingIntent() {
@@ -134,11 +137,11 @@ public class GeofenceRepository {
         return geofencePendingIntent;
     }
 
-    private boolean isInsideAreaOrConnected() {
+    public boolean isInsideAreaOrConnected() {
         return sharedPrefsUtils.isNetworkConnected() || sharedPrefsUtils.isInArea();
     }
 
-    public boolean getIsInsideArea() {
+    public boolean isInsideArea() {
         return sharedPrefsUtils.isInArea();
     }
 
@@ -146,7 +149,7 @@ public class GeofenceRepository {
         sharedPrefsUtils.setIsInArea(b);
     }
 
-    private void clearStoredLocationData() {
+    public void clearStoredLocationData() {
         sharedPrefsUtils.clearData();
     }
 
@@ -187,7 +190,6 @@ public class GeofenceRepository {
             geofenceList = new ArrayList<>(1);
 
         geofenceList.add(geofence);
-
         geofencingClient.addGeofences(getGeofencingRequest(geofenceList), getGeofencePendingIntent());
         sharedPrefsUtils.saveLocationData(latitude, longitude, radius);
     }

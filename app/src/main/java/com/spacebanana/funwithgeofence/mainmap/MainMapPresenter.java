@@ -32,11 +32,11 @@ public class MainMapPresenter extends Presenter<MainMap>  {
         repository.subscribeOnGeofenceAreaStatusChange().subscribe(aBoolean -> getView().showGeofenceStatus(aBoolean));
     }
 
-    void setNetworkName(String networkName) {
+    public void setNetworkName(String networkName) {
         repository.setNetworkName(networkName).subscribe(aBoolean -> getView().showGeofenceStatus(aBoolean));
     }
 
-    String getNetworkName() {
+    public String getNetworkName() {
         return repository.getNetworkName();
     }
 
@@ -44,10 +44,10 @@ public class MainMapPresenter extends Presenter<MainMap>  {
         return repository.getNetworkStateSubscription();
     }
 
-    void updateGeofenceArea(double lat, double lon, int radius) {
+    public void updateGeofenceArea(double lat, double lon, int radius) {
         repository.addGeofenceArea(lat, lon, radius).subscribe(
                 point -> {
-                    getView().showGeofenceArea(point.getLat(), point.getLon(), radius);
+                    getView().showGeofenceArea(point.getLat(), point.getLon(), point.getRadius());
                     getView().showGeofenceStatus(point.isInArea());
                 }
         );
